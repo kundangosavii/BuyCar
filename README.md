@@ -1,4 +1,4 @@
-# 🚗 Used Car Price Prediction System
+# Used Car Price Prediction System
 
 A machine learning web application that predicts the estimated selling price of a used car based on its characteristics. Built using Python, Scikit-learn, FastAPI, HTML, CSS, and JavaScript, the application combines a trained regression model with a responsive web interface.
 
