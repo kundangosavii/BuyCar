@@ -1,0 +1,330 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutoValue | Used Car Price Predictor</title>
+<style>
+:root {
+  --navy:#14233d; --blue:#3478f6; --purple:#8b5cf6;
+  --muted:#64748b; --line:#e2e8f0; --bg:#f5f8ff;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0; font-family:Inter,Segoe UI,Arial,sans-serif;
+  background:var(--bg); color:var(--navy);
+}
+header {
+  background:#182842; color:white; padding:17px 5%;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.brand {font-size:21px;font-weight:800;letter-spacing:-.5px}
+.brand span {color:#60a5fa}
+header a {color:#e2e8f0;text-decoration:none;font-size:14px}
+main {max-width:1250px;margin:28px auto;padding:0 22px}
+.hero {
+  background:linear-gradient(115deg,#e0edff,#f3f6ff 70%,#dceaff);
+  border:1px solid #dbeafe;border-radius:20px;padding:34px;
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+}
+.hero small {
+  color:#2563eb;font-weight:800;background:#fff;
+  border:1px solid #bfdbfe;border-radius:30px;padding:8px 12px;
+}
+.hero h1 {font-size:clamp(29px,4vw,44px);line-height:1.15;margin:23px 0 12px}
+.hero h1 span {color:var(--blue)}
+.hero p {color:#526681;line-height:1.7;max-width:570px}
+.hero-art {font-size:100px;min-width:140px;text-align:center}
+.layout {
+  display:grid;grid-template-columns:1.15fr .85fr;gap:20px;margin-top:22px;
+}
+.card {
+  background:white;border:1px solid var(--line);border-radius:18px;
+  padding:26px;box-shadow:0 8px 28px #18345b08;
+}
+.card h2 {margin:0 0 7px;font-size:22px}
+.subtitle {color:var(--muted);font-size:14px;margin:0 0 25px}
+.fields {display:grid;grid-template-columns:1fr 1fr;gap:19px}
+.field.full {grid-column:1/-1}
+label {display:block;font-size:13px;font-weight:700;margin-bottom:8px}
+input,select {
+  width:100%;height:47px;border:1px solid #d7e0ed;border-radius:10px;
+  padding:0 12px;background:#fff;color:#243650;font-size:14px;outline:none;
+}
+input:focus,select:focus {border-color:var(--blue);box-shadow:0 0 0 3px #3478f618}
+button {
+  width:100%;border:0;border-radius:10px;padding:15px;
+  color:white;font-size:15px;font-weight:800;cursor:pointer;
+  background:linear-gradient(100deg,#278cf7,#8b5cf6);
+  transition:transform .15s,opacity .15s;margin-top:24px;
+}
+button:hover {transform:translateY(-1px)}
+button:disabled {opacity:.6;cursor:wait}
+.result {
+  border-radius:14px;padding:23px;background:linear-gradient(140deg,#edfcf5,#f4fbff);
+  border:1px solid #d7f4e5;text-align:center;
+}
+.result .eyebrow {font-size:13px;color:#387b67;font-weight:800}
+.price {font-size:clamp(30px,4vw,43px);font-weight:850;color:#07876a;margin:13px 0}
+.status {font-size:13px;color:#52756c;line-height:1.6}
+.result.empty {background:#f8fafc;border-color:var(--line)}
+.result.empty .price {color:#94a3b8;font-size:27px}
+.summary {margin-top:20px;padding:18px;border:1px solid var(--line);border-radius:12px}
+.summary h3 {margin:0 0 12px;font-size:15px}
+.summary-row {
+  display:flex;justify-content:space-between;gap:10px;padding:11px 0;
+  border-bottom:1px solid #edf1f6;font-size:13px;
+}
+.summary-row:last-child {border-bottom:0}
+.summary-row span {color:var(--muted)}
+.summary-row strong {text-align:right;overflow-wrap:anywhere}
+.how {
+  margin-top:20px;background:white;border:1px solid var(--line);
+  border-radius:16px;padding:23px;
+}
+.steps {display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:18px}
+.step {display:flex;align-items:center;gap:12px;font-size:13px;color:var(--muted)}
+.num {
+  width:38px;height:38px;border-radius:50%;background:#e8f0ff;color:#2563eb;
+  display:grid;place-items:center;font-weight:900;flex-shrink:0;
+}
+footer {text-align:center;padding:25px;color:var(--muted);font-size:12px}
+#error {color:#b91c1c;font-size:13px;margin-top:12px;line-height:1.5}
+@media(max-width:800px) {
+  .layout {grid-template-columns:1fr}
+  .hero {padding:25px}
+  .hero-art {font-size:65px}
+}
+@media(max-width:520px) {
+  main {padding:0 12px;margin:16px auto}
+  .hero {padding:23px;display:block}
+  .hero-art {display:none}
+  .card {padding:19px}
+  .fields {grid-template-columns:1fr}
+  .field.full {grid-column:auto}
+  .steps {grid-template-columns:1fr}
+  header {padding:16px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">🚘 Auto<span>Value</span></div>
+  <a href="#predictor">PRICE ESTIMATOR&nbsp; ↗</a>
+</header>
+
+<main>
+  <section class="hero">
+    <div>
+      <small>✦ MACHINE LEARNING POWERED</small>
+      <h1>Discover Your Car's<br><span>Estimated Value.</span></h1>
+      <p>Thinking of selling your car? Enter its details to get a machine-learning-based price estimate in seconds.</p>
+    </div>
+    <div class="hero-art" aria-hidden="true">🚙</div>
+  </section>
+
+  <section class="layout" id="predictor">
+    <div class="card">
+      <h2>🚗 Car Details</h2>
+      <p class="subtitle">Tell us a little about the car you want to value.</p>
+
+      <form id="carForm">
+        <div class="fields">
+          <div class="field full">
+            <label for="name">Car Model</label>
+            <select id="name" required><option value="">Loading car models...</option></select>
+          </div>
+          <div class="field">
+            <label for="year">Manufacturing Year</label>
+            <input id="year" type="number" min="1900" max="2100" value="2017" required>
+          </div>
+          <div class="field">
+            <label for="km_driven">Kilometres Driven</label>
+            <input id="km_driven" type="number" min="0" value="60000" required>
+          </div>
+          <div class="field">
+            <label for="fuel">Fuel Type</label>
+            <select id="fuel" required></select>
+          </div>
+          <div class="field">
+            <label for="seller_type">Seller Type</label>
+            <select id="seller_type" required></select>
+          </div>
+          <div class="field">
+            <label for="transmission">Transmission</label>
+            <select id="transmission" required></select>
+          </div>
+          <div class="field">
+            <label for="owner">Ownership</label>
+            <select id="owner" required></select>
+          </div>
+        </div>
+        <button id="submitBtn" type="submit">✦ &nbsp; Predict Selling Price</button>
+        <div id="error" role="alert"></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>📈 Your Price Estimate</h2>
+      <p class="subtitle">Your prediction will appear here.</p>
+      <div class="result empty" id="result" aria-live="polite">
+        <div class="eyebrow">ESTIMATED SELLING PRICE</div>
+        <div class="price" id="price">₹ —</div>
+        <div class="status" id="status">Enter your car details and select Predict Selling Price.</div>
+      </div>
+      <div class="summary">
+        <h3>📋 Car Summary</h3>
+        <div id="summaryRows">
+          <div class="summary-row"><span>Car Model</span><strong>Not selected</strong></div>
+          <div class="summary-row"><span>Year</span><strong>—</strong></div>
+          <div class="summary-row"><span>Kilometres</span><strong>—</strong></div>
+          <div class="summary-row"><span>Fuel</span><strong>—</strong></div>
+          <div class="summary-row"><span>Seller</span><strong>—</strong></div>
+          <div class="summary-row"><span>Transmission</span><strong>—</strong></div>
+          <div class="summary-row"><span>Owner</span><strong>—</strong></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how">
+    <h2>How it works</h2>
+    <div class="steps">
+      <div class="step"><div class="num">1</div><div><strong>Enter Details</strong><br>Provide the car's information.</div></div>
+      <div class="step"><div class="num">2</div><div><strong>AI Model Analysis</strong><br>The trained model processes your input.</div></div>
+      <div class="step"><div class="num">3</div><div><strong>Get an Estimate</strong><br>View the predicted selling price.</div></div>
+    </div>
+  </section>
+</main>
+
+<footer>AutoValue · Machine Learning Project · Estimates are not guaranteed market prices.</footer>
+
+<script>
+const API = ""; // Same origin: FastAPI serves this page.
+const fieldIds = ["name", "year", "km_driven", "fuel",
+                  "seller_type", "transmission", "owner"];
+
+const $ = id => document.getElementById(id);
+
+function addOptions(id, values) {
+  const select = $(id);
+  select.replaceChildren();
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = "Select an option";
+  placeholder.disabled = true;
+  placeholder.selected = true;
+  select.appendChild(placeholder);
+
+  values.forEach(value => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = value;
+    select.appendChild(option);
+  });
+}
+
+async function loadOptions() {
+  try {
+    const response = await fetch(`${API}/options`);
+    if (!response.ok) throw new Error("Could not load dropdown options.");
+    const metadata = await response.json();
+    const options = metadata.categorical_options;
+
+    ["name", "fuel", "seller_type", "transmission", "owner"].forEach(id => {
+      addOptions(id, options[id] || []);
+    });
+
+    $("year").min = metadata.year_min;
+    $("year").max = metadata.year_max;
+    $("year").value = metadata.year_max;
+
+    $("km_driven").max = Math.max(0, metadata.km_max);
+  } catch (error) {
+    $("error").textContent =
+      "Unable to load car options. Check that FastAPI is running and /options works.";
+  }
+}
+
+function getCarData() {
+  return {
+    name: $("name").value,
+    year: Number($("year").value),
+    km_driven: Number($("km_driven").value),
+    fuel: $("fuel").value,
+    seller_type: $("seller_type").value,
+    transmission: $("transmission").value,
+    owner: $("owner").value
+  };
+}
+
+function renderSummary(car) {
+  const labels = [
+    ["Car Model", car.name],
+    ["Year", car.year],
+    ["Kilometres", Number(car.km_driven).toLocaleString("en-IN") + " km"],
+    ["Fuel", car.fuel],
+    ["Seller", car.seller_type],
+    ["Transmission", car.transmission],
+    ["Owner", car.owner]
+  ];
+
+  $("summaryRows").replaceChildren();
+  labels.forEach(([label, value]) => {
+    const row = document.createElement("div");
+    row.className = "summary-row";
+    const left = document.createElement("span");
+    const right = document.createElement("strong");
+    left.textContent = label;
+    right.textContent = value;
+    row.append(left, right);
+    $("summaryRows").appendChild(row);
+  });
+}
+
+$("carForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  $("error").textContent = "";
+
+  const car = getCarData();
+  renderSummary(car);
+  $("submitBtn").disabled = true;
+  $("submitBtn").textContent = "Analysing car details...";
+  $("status").textContent = "Your model is calculating an estimate.";
+  $("price").textContent = "Calculating…";
+
+  try {
+    const response = await fetch(`${API}/predict`, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(car)
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.detail || "Prediction request failed.");
+    }
+
+    $("price").textContent = new Intl.NumberFormat("en-IN", {
+      style: "currency", currency: data.currency || "INR",
+      maximumFractionDigits: 0
+    }).format(data.predicted_price);
+
+    $("status").textContent =
+      data.note || "This is an estimated value, not a guaranteed selling price.";
+    $("result").classList.remove("empty");
+  } catch (error) {
+    $("price").textContent = "Unavailable";
+    $("status").textContent = "Please check your inputs and try again.";
+    $("error").textContent = error.message;
+  } finally {
+    $("submitBtn").disabled = false;
+    $("submitBtn").textContent = "✦  Predict Selling Price";
+  }
+});
+
+loadOptions();
+</script>
+</body>
+</html>
